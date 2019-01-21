@@ -1,0 +1,60 @@
+{% extends "master.html" %}
+{% block content %}
+        {% for autor in autores %}
+        <div><p>{{ autor.identificacion.username }} {{ autor.identificacion.apellido }} tiene el título de <b>{{ autor.titulo }}</b></p></div>
+        {% endfor %}
+<hr>
+        <form class="form-inline">
+          {{ form.csrf_token }}
+          <div class="form-group">
+	          {{form.country(class="form-control")}}
+	        </div>
+	        <button type="submit" class="btn btn-info">Submit</button>
+        </form>
+        <div id="result"></div>
+
+  <script type="text/javascript">
+    console.log("Llegando")
+    $(document).ready(function(){
+      var countries=[];
+
+      function loadCountries(){
+        $.getJSON('/countries', function(data, status, xhr){
+            for (var i = 0; i < data.length; i++ ) {
+              countries.push(data[i].name);
+            }
+        });
+    };
+
+    loadCountries();
+
+    $('#country').autocomplete({
+      source: countries,  
+    });
+
+    $('form').on('submit', function(e){
+		$.ajax({
+			data: {
+				country:$('#country').val()
+			},
+			type: 'POST',
+			url : '/process'
+		})
+		.done(function(data){
+		  console.log(data);
+			if (data.error){
+				$('#result').text(data.error).show();
+			}
+			else {
+				$('#result').html(data.country).show()
+			}
+		})
+
+		  e.preventDefault();
+	  });
+
+
+  }); 
+  </script>
+{% endblock %}
+
